@@ -1,0 +1,5 @@
+获取所有controller
+
+将里面所有的requestMapping写到一个统一容器里面
+
+用户请求时候，会将参数注入到带有requestMapping的方法参数上面，不需要自己手动获取参数然后写入
