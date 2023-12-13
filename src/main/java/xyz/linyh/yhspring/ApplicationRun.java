@@ -1,16 +1,20 @@
 package xyz.linyh.yhspring;
 
-import org.apache.catalina.Context;
+
 import org.apache.catalina.LifecycleException;
-import org.apache.catalina.WebResourceRoot;
+import org.apache.catalina.Server;
+import org.apache.catalina.Service;
 import org.apache.catalina.connector.Connector;
+import org.apache.catalina.core.StandardContext;
+import org.apache.catalina.core.StandardEngine;
+import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.startup.Tomcat;
-import org.apache.catalina.webresources.DirResourceSet;
-import org.apache.catalina.webresources.StandardRoot;
 import xyz.linyh.yhspring.annotationScan.ControllerAnnoScan;
 import xyz.linyh.yhspring.entity.MyMethod;
 import xyz.linyh.yhspring.handle.HandlerMapping;
 import xyz.linyh.yhspring.handle.SimpleHandlerMapping;
+import xyz.linyh.yhspring.servlet.Dispatcherservlet;
+import xyz.linyh.yhspring.servlet.TestServlet;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +32,7 @@ public class ApplicationRun {
         String packageName = ApplicationRun.class.getPackage().getName();
         controllerClass = ControllerAnnoScan.getControllerClass(packageName);
 //        根据controller里面的所有controller，获取所有的方法
-        SimpleHandlerMapping simpleHandlerMapping = new SimpleHandlerMapping();
+        HandlerMapping simpleHandlerMapping = SimpleHandlerMapping.getInstance();
         List list = simpleHandlerMapping.buildMapping(controllerClass);
 
 //        启动tomcat
@@ -40,20 +44,44 @@ public class ApplicationRun {
 
     }
 
-    private static void startTomcat() throws LifecycleException {
-//        TODO 可能还要获取配置文件
-                Tomcat tomcat = new Tomcat();
-        tomcat.setPort(Integer.getInteger("port", 8080));
-        tomcat.getConnector();
-        // 创建webapp:
-        Context ctx = tomcat.addWebapp("", new File("src/main/webapp").getAbsolutePath());
-        WebResourceRoot resources = new StandardRoot(ctx);
-        resources.addPreResources(
-                new DirResourceSet(resources, "/WEB-INF/classes", new File("target/classes").getAbsolutePath(), "/"));
-        ctx.setResources(resources);
-        tomcat.start();
-        tomcat.getServer().await();
+    /**
+     * 启动tomcat
+     */
+    private static void startTomcat(){
+//        TODO 可能还要获取配置
+        Tomcat tomcat = new Tomcat();
 
+        Server server = tomcat.getServer();
+        Service service = server.findService("Tomcat");
+
+        //创建链接,绑定端口
+        Connector connector = new Connector();
+        connector.setPort(8081);
+
+        StandardEngine standardEngine = new StandardEngine();
+        standardEngine.setDefaultHost("localhost");
+
+        StandardHost host = new StandardHost();
+        host.setName("localhost");
+
+        String contextPath = "";
+        StandardContext context = new StandardContext();
+        context.setPath(contextPath);
+        context.addLifecycleListener(new Tomcat.FixContextListener());
+
+        host.addChild(context);
+        standardEngine.addChild(host);
+
+        service.setContainer(standardEngine);
+        service.addConnector(connector);
+        tomcat.addServlet(contextPath, "dispatcherServlet", new Dispatcherservlet());
+        context.addServletMappingDecoded("/*","dispatcherServlet");
+
+        try {
+            tomcat.start();
+        } catch (LifecycleException e) {
+            e.printStackTrace();
+        }
 
     }
 

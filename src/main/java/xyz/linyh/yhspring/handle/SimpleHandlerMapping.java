@@ -1,10 +1,13 @@
 package xyz.linyh.yhspring.handle;
 
+import jakarta.servlet.http.HttpServletRequest;
 import xyz.linyh.yhspring.annotation.GetMapping;
 import xyz.linyh.yhspring.annotation.PostMapping;
+import xyz.linyh.yhspring.annotation.RequestBody;
 import xyz.linyh.yhspring.annotation.RequestMapping;
 import xyz.linyh.yhspring.entity.MyMethod;
 import xyz.linyh.yhspring.entity.MyMethodParameter;
+import xyz.linyh.yhspring.servlet.YhHandlerExecutionChain;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -12,12 +15,28 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author lin
+ */
 public class SimpleHandlerMapping implements HandlerMapping{
 
     /**
      *  保存每一个controller里面的所有方法和里面的所有接口地址
       */
     List<MyMethod> allMappingMethod = new ArrayList<>();
+
+    private SimpleHandlerMapping() {
+    }
+
+    private static class SimpleHandlerMappingHolder{
+        private static final SimpleHandlerMapping INSTANCE = new SimpleHandlerMapping();
+    }
+
+    public static SimpleHandlerMapping getInstance(){
+        return SimpleHandlerMappingHolder.INSTANCE;
+    }
+
+
 
     /**
      * 传入controller，解析里面带有特定注解的方法
@@ -54,6 +73,18 @@ public class SimpleHandlerMapping implements HandlerMapping{
         return myMethods;
     }
 
+    @Override
+    public YhHandlerExecutionChain getHandler(HttpServletRequest request) {
+        String requestURI = request.getRequestURI();
+        String method = request.getMethod();
+        for (MyMethod myMethod : allMappingMethod) {
+            if (myMethod.getUrl().equals(requestURI) && myMethod.getRequestMethod().equals(method)) {
+                return new YhHandlerExecutionChain(myMethod);
+            }
+        }
+        return null;
+    }
+
     private String getRequestMethod(Method method) {
 //        TODO 后面扩展为可以设置多个请求方式
         boolean hasGetMapping= method.isAnnotationPresent(GetMapping.class);
@@ -81,7 +112,11 @@ public class SimpleHandlerMapping implements HandlerMapping{
             myMethodParameter.setDefaultValue(null);
             myMethodParameter.setName(parameterName);
             myMethodParameter.setType(parameterType);
+            myMethodParameter.setFromUrl(!parameter.isAnnotationPresent(RequestBody.class));
+//            TODO 可以添加设置是否必须,后面在管
+            myMethodParameter.setRequire(true);
             myMethodParameters.add(myMethodParameter);
+
         }
         return myMethodParameters;
     }
