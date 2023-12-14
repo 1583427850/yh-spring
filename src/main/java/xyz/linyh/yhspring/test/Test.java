@@ -35,10 +35,10 @@ public class Test {
 
     }
 
-    @GetMapping("/test4/{id}/{pageId}")
-    public void test4(String username, MyMethod testMethod, @PathVariable("id") String id, @PathVariable("pageId") String pageId) {
+    @PostMapping("/test4/{id}/{pageId}")
+    public void test4(String username, @RequestBody user user, @PathVariable("id") String id, @PathVariable("pageId") String pageId) {
         System.out.println(username);
-        System.out.println(testMethod);
+        System.out.println(user);
         System.out.println(id);
         System.out.println(pageId);
     }

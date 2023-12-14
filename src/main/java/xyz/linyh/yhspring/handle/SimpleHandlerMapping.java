@@ -180,23 +180,41 @@ public class SimpleHandlerMapping implements HandlerMapping {
      */
     @Override
     public YhHandlerExecutionChain getHandler(HttpServletRequest request) {
-//        String requestURI = request.getRequestURI();
-//        String method = request.getMethod();
-//        YhHandlerExecutionChain returnHandler = null;
-////        1. 先直接匹配，看能不能匹配到
-//        for (MyMethod myMethod : allMappingMethod) {
-//
-//            if (myMethod.getUrl().equals(requestURI) && myMethod.getRequestMethod().equals(method)) {
-//                returnHandler = new YhHandlerExecutionChain(myMethod);
-//            }
-//        }
-//        if (returnHandler == null) {
-////        2. 如果匹配不到，那么就需要去匹配那些通配符的匹配
-//
-//        }
-//        return returnHandler;
+        String requestURI = request.getRequestURI();
+        String[] split = requestURI.split("/");
+        if (split.length>=1){
+            split = Arrays.copyOfRange(split,1,split.length);
+        }
+
+//        匹配是否有匹配的路径
+        RouterNode tempNode = routerNodeHeader;
+        int len = 0;
+        for (String s : split) {
+            List<RouterNode> children = tempNode.getChildren();
+            for (RouterNode child : children) {
+                if(child.getPart().equals(s) || child.isWild()){
+                    tempNode = child;
+                    len++;
+                    break;
+                }
+            }
+        }
+
+        if(len != split.length){
+            return null;
+        }
+
+        List<MyMethod> myMethods = tempNode.getMyMethods();
+        for (MyMethod myMethod : myMethods) {
+            if(myMethod.getRequestMethod().equals(request.getMethod())){
+                return new YhHandlerExecutionChain(myMethod);
+            }
+        }
         return null;
+
     }
+
+
 
     private String getRequestMethod(Method method) {
 //        TODO 后面扩展为可以设置多个请求方式

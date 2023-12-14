@@ -33,6 +33,15 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
 
 //        获取里面的方法参数
         List<MyMethodParameter> methodParameters = handlerMethod.getMethodParameters();
+
+//        获取pathPramers个数
+        int pathParamNum = 0;
+        for(MyMethodParameter methodParameter : methodParameters) {
+            if (RequestConstant.PARAM_TYPE_PATH.equals(methodParameter.getParamType())) {
+                pathParamNum++;
+            }
+        }
+
 //        将里面所有的方法参数类型提取出来
         List<Class<?>> methodParameterTypes = new ArrayList<>();
 
@@ -92,12 +101,12 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
                 String requestURI = request.getRequestURI();
                 String[] requestPath = requestURI.split("/");
                 String[] srcPath = handlerMethod.getUrl().split("/");
-                if(requestPath.length==srcPath.length){
+                if(requestPath.length!=srcPath.length){
                     System.out.println("路径参数不匹配");
 //                    TODO 统一返回错误信息
                 }
-                String s = requestPath[requestPath.length - 1];
-
+//                TODO 获取参数出现错误
+                String s = requestPath[requestPath.length - pathParamNum--];
                 methodParams.add(s);
             }
 
@@ -120,7 +129,6 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
      */
     private Object jsonBodyToBean(String bodyJson, Class<?> type) {
         if (bodyJson == null) {
-//            TODO 返回错误信息
             System.out.println("bodyJson is null");
         }
         if (bodyJson == null || bodyJson.length() < 1) {
