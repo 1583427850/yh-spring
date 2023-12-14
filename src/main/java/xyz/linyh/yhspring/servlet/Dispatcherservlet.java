@@ -11,10 +11,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.HttpMethod;
 import lombok.SneakyThrows;
+import xyz.linyh.yhspring.constant.RequestConstant;
 import xyz.linyh.yhspring.entity.MyMethod;
 import xyz.linyh.yhspring.entity.MyMethodParameter;
 import xyz.linyh.yhspring.handle.HandlerAdaptor;
 import xyz.linyh.yhspring.handle.HandlerMapping;
+import xyz.linyh.yhspring.handle.SimpleHandlerAdaptor;
 import xyz.linyh.yhspring.handle.SimpleHandlerMapping;
 
 import java.io.BufferedReader;
@@ -28,20 +30,24 @@ import java.util.List;
 @WebServlet(name = "dispatcherservlet", urlPatterns = "/**")
 public class Dispatcherservlet extends HttpServlet {
     public void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
-//         1.获取请求的url
         System.out.println(request.getRequestURI());
-//         2.根据url获取对应的handler
+
         YhHandlerExecutionChain handler = getHandler(request);
-//         3. 获取adaptor
+
+        if (handler == null) {
+//            TODO 统一返回错误信息
+            System.out.println("handler is null");
+            return;
+        }
+
 //        可以去执行接口对应的方法
         HandlerAdaptor handlerAdaptor = getAdaptor(handler, request);
 
-        // 3.根据handler获取对应的controller
-        // 4.根据handler获取对应的方法
-        // 5.根据handler获取对应的参数
-        // 6.根据参数获取对应的值
-        // 7.执行方法
-        // 8.返回结果
+//        利用adaptor执行对应方法，然后获取到返回值
+        String result = handlerAdaptor.handle(request, response, handler.getHandlerMethod());
+        System.out.println("返回结果为:" + result);
+
+
     }
 
     /**
@@ -51,73 +57,12 @@ public class Dispatcherservlet extends HttpServlet {
      * @return
      */
     private HandlerAdaptor getAdaptor(YhHandlerExecutionChain handler, HttpServletRequest request) throws Exception {
-        MyMethod handlerMethod = handler.getHandlerMethod();
-//        获取里面的方法参数
-        List<MyMethodParameter> methodParameters = handlerMethod.getMethodParameters();
-//        将里面所有的方法参数类型提取出来
-        List<Class<?>> methodParameterTypes = new ArrayList<>();
 
-        JSONObject bodyJson = null;
-        for (MyMethodParameter methodParameter : methodParameters) {
-            Class<?> type = methodParameter.getType();
-            methodParameterTypes.add(type);
-        }
-        Method method = handlerMethod.getClassName().getMethod(handlerMethod.getMethodName(), methodParameterTypes.toArray(new Class<?>[0]));
+        return new SimpleHandlerAdaptor();
 
-        if(method==null){
-//            TODO
-            System.out.println("method is null");
-        }
 
-        if(request.getMethod().equals(HttpMethod.POST)){
-            BufferedReader reader = request.getReader();
-            String str, wholeStr = "";
-            while ((str = reader.readLine()) != null) {
-                wholeStr += str;
-            }
-            bodyJson = JSONUtil.parseObj(wholeStr);
-        }
-
-        ArrayList<Object> methodParams= new ArrayList<>();
-        for (MyMethodParameter methodParameter : methodParameters) {
-            String parameterName = methodParameter.getName();
-//            TODO 判断他是get请求的参数还是post请求的参数
-            Object param = getParam(parameterName, request.getMethod());
-            methodParams.add(param);
-
-        }
-//        TODO 差传入的参数
-        method.invoke(handlerMethod.getClassName().newInstance(), null);
-
-//        参数需要根据参数列表获取然后传入
-
-        for (MyMethodParameter methodParameter : methodParameters) {
-            Class<?> type = methodParameter.getType();
-
-        }
-
-//        判断请求方法，如果是post，那么就需要获取请求体参数
-        if("POST".equals(request.getMethod())){
-//            getRequestBody(request);
-        }
-
-//        request.getParameter()
-        try {
-            BufferedReader reader = request.getReader();
-            String str, wholeStr = "";
-            while ((str = reader.readLine()) != null) {
-                wholeStr += str;
-            }
-            JSONObject entries = JSONUtil.parseObj(wholeStr);
-            System.out.println(entries.get("hello"));
-//            System.out.println(wholeStr);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-//        获取request里面对应的参数
-
-        return null;
     }
+
 
     private Object getParam(String parameterName, String method) {
         return null;

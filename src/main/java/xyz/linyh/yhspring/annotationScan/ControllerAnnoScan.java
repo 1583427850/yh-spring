@@ -11,7 +11,9 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 
-/** 可以用来扫描某一个包下面所有controller的类
+/**
+ * 可以用来扫描某一个包下面所有controller的类
+ *
  * @author lin
  */
 public class ControllerAnnoScan {
@@ -22,35 +24,36 @@ public class ControllerAnnoScan {
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         ArrayList<Class<?>> classes = new ArrayList<>();
         URL resource = contextClassLoader.getResource(packageName.replace(".", "/"));
-        if(resource== null){
+        if (resource == null) {
             return classes;
         }
         File dir = new File(resource.getFile());
 
-        return getClassByUrl(dir,packageName,classes);
+        return getClassByUrl(dir, packageName, classes);
 
 
     }
 
     /**
      * 递归查找所有类
+     *
      * @param dir
      * @param classes
      * @return
      * @throws ClassNotFoundException
      */
-    private static List<Class<?>> getClassByUrl(File dir, String filePath,ArrayList<Class<?>> classes) throws ClassNotFoundException {
+    private static List<Class<?>> getClassByUrl(File dir, String filePath, ArrayList<Class<?>> classes) throws ClassNotFoundException {
 //        System.out.println(filePath);
         File[] files = dir.listFiles();
         for (File file : files) {
-            if(file.isDirectory()){
-                getClassByUrl(file,filePath+"."+file.getName(),classes);
-            }else{
+            if (file.isDirectory()) {
+                getClassByUrl(file, filePath + "." + file.getName(), classes);
+            } else {
                 String name = file.getName();
-                if(name.endsWith(".class")){
+                if (name.endsWith(".class")) {
                     String className = name.substring(0, name.lastIndexOf("."));
                     Class<?> clazz = Class.forName(filePath + "." + className);
-                    if(clazz.isAnnotationPresent(YhController.class)){
+                    if (clazz.isAnnotationPresent(YhController.class)) {
                         classes.add(clazz);
                     }
                 }

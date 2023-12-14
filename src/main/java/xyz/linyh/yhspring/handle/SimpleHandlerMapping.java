@@ -1,10 +1,8 @@
 package xyz.linyh.yhspring.handle;
 
 import jakarta.servlet.http.HttpServletRequest;
-import xyz.linyh.yhspring.annotation.GetMapping;
-import xyz.linyh.yhspring.annotation.PostMapping;
-import xyz.linyh.yhspring.annotation.RequestBody;
-import xyz.linyh.yhspring.annotation.RequestMapping;
+import xyz.linyh.yhspring.annotation.*;
+import xyz.linyh.yhspring.constant.RequestConstant;
 import xyz.linyh.yhspring.entity.MyMethod;
 import xyz.linyh.yhspring.entity.MyMethodParameter;
 import xyz.linyh.yhspring.servlet.YhHandlerExecutionChain;
@@ -18,24 +16,23 @@ import java.util.List;
 /**
  * @author lin
  */
-public class SimpleHandlerMapping implements HandlerMapping{
+public class SimpleHandlerMapping implements HandlerMapping {
 
     /**
-     *  保存每一个controller里面的所有方法和里面的所有接口地址
-      */
+     * 保存每一个controller里面的所有方法和里面的所有接口地址
+     */
     List<MyMethod> allMappingMethod = new ArrayList<>();
 
     private SimpleHandlerMapping() {
     }
 
-    private static class SimpleHandlerMappingHolder{
+    private static class SimpleHandlerMappingHolder {
         private static final SimpleHandlerMapping INSTANCE = new SimpleHandlerMapping();
     }
 
-    public static SimpleHandlerMapping getInstance(){
+    public static SimpleHandlerMapping getInstance() {
         return SimpleHandlerMappingHolder.INSTANCE;
     }
-
 
 
     /**
@@ -59,7 +56,7 @@ public class SimpleHandlerMapping implements HandlerMapping{
             for (Method method : controllerMappingMethod) {
                 String mappingUrl = getMethodMappingUrl(method);
                 MyMethod myMethod = new MyMethod();
-                String url = prefixUrl==null ? mappingUrl : prefixUrl + mappingUrl;
+                String url = prefixUrl == null ? mappingUrl : prefixUrl + mappingUrl;
                 myMethod.setUrl(url);
                 myMethod.setMethodName(method.getName());
                 myMethod.setReturnType(method.getReturnType());
@@ -87,7 +84,7 @@ public class SimpleHandlerMapping implements HandlerMapping{
 
     private String getRequestMethod(Method method) {
 //        TODO 后面扩展为可以设置多个请求方式
-        boolean hasGetMapping= method.isAnnotationPresent(GetMapping.class);
+        boolean hasGetMapping = method.isAnnotationPresent(GetMapping.class);
         boolean hasPostMapping = method.isAnnotationPresent(PostMapping.class);
         boolean hasRequestMapping = method.isAnnotationPresent(RequestMapping.class);
         if (hasGetMapping) {
@@ -112,13 +109,32 @@ public class SimpleHandlerMapping implements HandlerMapping{
             myMethodParameter.setDefaultValue(null);
             myMethodParameter.setName(parameterName);
             myMethodParameter.setType(parameterType);
-            myMethodParameter.setFromUrl(!parameter.isAnnotationPresent(RequestBody.class));
+            String type = getParamType(parameter);
+            myMethodParameter.setParamType(type);
 //            TODO 可以添加设置是否必须,后面在管
             myMethodParameter.setRequire(true);
             myMethodParameters.add(myMethodParameter);
 
         }
         return myMethodParameters;
+    }
+
+    /**
+     * 获取这个参数应该是在请求的哪个地方获取（如url参数，或body参数这些）
+     *
+     * @param parameter
+     * @return
+     */
+    private String getParamType(Parameter parameter) {
+        Annotation[] annotations = parameter.getAnnotations();
+        for (Annotation annotation : annotations) {
+            if (annotation instanceof RequestBody) {
+                return RequestConstant.PARAM_TYPE_BODY;
+            } else if (annotation instanceof PathVariable) {
+                return RequestConstant.PARAM_TYPE_PATH;
+            }
+        }
+        return RequestConstant.PARAM_TYPE_PARAM;
     }
 
     private String getControllerMappingUrl(Class<?> aClass) {
@@ -134,6 +150,7 @@ public class SimpleHandlerMapping implements HandlerMapping{
         }
         return null;
     }
+
     private String getMethodMappingUrl(Method method) {
         PostMapping postAnnotation = method.getAnnotation(PostMapping.class);
         RequestMapping requestAnnotation = method.getAnnotation(RequestMapping.class);

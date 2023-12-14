@@ -10,15 +10,11 @@ import org.apache.catalina.core.StandardEngine;
 import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.startup.Tomcat;
 import xyz.linyh.yhspring.annotationScan.ControllerAnnoScan;
-import xyz.linyh.yhspring.entity.MyMethod;
 import xyz.linyh.yhspring.handle.HandlerMapping;
 import xyz.linyh.yhspring.handle.SimpleHandlerMapping;
 import xyz.linyh.yhspring.servlet.Dispatcherservlet;
-import xyz.linyh.yhspring.servlet.TestServlet;
 
-import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.List;
 
 public class ApplicationRun {
@@ -47,7 +43,7 @@ public class ApplicationRun {
     /**
      * 启动tomcat
      */
-    private static void startTomcat(){
+    private static void startTomcat() {
 //        TODO 可能还要获取配置
         Tomcat tomcat = new Tomcat();
 
@@ -75,12 +71,13 @@ public class ApplicationRun {
         service.setContainer(standardEngine);
         service.addConnector(connector);
         tomcat.addServlet(contextPath, "dispatcherServlet", new Dispatcherservlet());
-        context.addServletMappingDecoded("/*","dispatcherServlet");
+        context.addServletMappingDecoded("/*", "dispatcherServlet");
 
         try {
             tomcat.start();
         } catch (LifecycleException e) {
-            e.printStackTrace();
+            System.out.println("tomcat启动失败");
+            System.exit(1);
         }
 
     }

@@ -1,5 +1,7 @@
 package xyz.linyh.yhspring.test;
 
+import cn.hutool.json.JSONUtil;
+import lombok.Data;
 import xyz.linyh.yhspring.annotation.*;
 import xyz.linyh.yhspring.entity.MyMethod;
 import xyz.linyh.yhspring.entity.MyMethodParameter;
@@ -13,31 +15,37 @@ import java.lang.reflect.Method;
 public class Test {
 
     @RequestMapping(value = "/test")
-    public void test1(String username, MyMethod testMethod){
+    public void test1(String username, MyMethod testMethod) {
         System.out.println(username);
         System.out.println(testMethod);
 
     }
 
     @PostMapping(value = "/test2")
-    public  MyMethodParameter test2(String id,@RequestBody user user){
+    public MyMethodParameter test2(String id, @RequestBody user user) {
+        System.out.println(id);
+        System.out.println(user);
         return null;
 
     }
 
 
     @GetMapping(value = "/test3")
-    public void test3(String username, MyMethod testMethod){
+    public void test3(String username, MyMethod testMethod) {
 
     }
 
 
-
-    class user{
+    @Data
+    class user {
         private String username;
         private String password;
     }
 
+//    public static void main(String[] args) {
+//        JSONUtil.toBean("")
+//        {    "username": "tom",    "password": "123456"}
+//    }
 
 
 }
