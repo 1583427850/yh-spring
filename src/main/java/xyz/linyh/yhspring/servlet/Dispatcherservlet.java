@@ -1,31 +1,15 @@
 package xyz.linyh.yhspring.servlet;
 
 
-import cn.hutool.json.JSON;
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.ws.rs.HttpMethod;
 import lombok.SneakyThrows;
-import xyz.linyh.yhspring.constant.RequestConstant;
-import xyz.linyh.yhspring.entity.MyMethod;
-import xyz.linyh.yhspring.entity.MyMethodParameter;
 import xyz.linyh.yhspring.handle.HandlerAdaptor;
 import xyz.linyh.yhspring.handle.HandlerMapping;
 import xyz.linyh.yhspring.handle.SimpleHandlerAdaptor;
 import xyz.linyh.yhspring.handle.SimpleHandlerMapping;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @WebServlet(name = "dispatcherservlet", urlPatterns = "/**")
 public class Dispatcherservlet extends HttpServlet {
@@ -63,10 +47,6 @@ public class Dispatcherservlet extends HttpServlet {
 
     }
 
-
-    private Object getParam(String parameterName, String method) {
-        return null;
-    }
 
 
     /**

@@ -14,7 +14,7 @@ public interface HandlerMapping {
      * @param controllerClass
      * @return
      */
-    List buildMapping(List<Class<?>> controllerClass);
+    void buildMapping(List<Class<?>> controllerClass);
 
     YhHandlerExecutionChain getHandler(HttpServletRequest request);
 

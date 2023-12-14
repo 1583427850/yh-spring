@@ -2,6 +2,7 @@ package xyz.linyh.yhspring.constant;
 
 
 /**
+ * 一些可能会用到的常量参数
  * @author lin
  */
 public interface RequestConstant {

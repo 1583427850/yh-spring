@@ -5,13 +5,13 @@ import xyz.linyh.yhspring.annotation.*;
 import xyz.linyh.yhspring.constant.RequestConstant;
 import xyz.linyh.yhspring.entity.MyMethod;
 import xyz.linyh.yhspring.entity.MyMethodParameter;
+import xyz.linyh.yhspring.entity.RouterNode;
 import xyz.linyh.yhspring.servlet.YhHandlerExecutionChain;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author lin
@@ -21,9 +21,16 @@ public class SimpleHandlerMapping implements HandlerMapping {
     /**
      * 保存每一个controller里面的所有方法和里面的所有接口地址
      */
-    List<MyMethod> allMappingMethod = new ArrayList<>();
+//    List<MyMethod> allMappingMethod = new ArrayList<>();
+
+    RouterNode routerNodeHeader;
 
     private SimpleHandlerMapping() {
+    }
+
+
+    public RouterNode getRouterNodeHeader() {
+        return routerNodeHeader;
     }
 
     private static class SimpleHandlerMappingHolder {
@@ -42,8 +49,12 @@ public class SimpleHandlerMapping implements HandlerMapping {
      * @return
      */
     @Override
-    public List buildMapping(List<Class<?>> controllerClass) {
-        List<MyMethod> myMethods = new ArrayList<>();
+    public void buildMapping(List<Class<?>> controllerClass) {
+//        List<MyMethod> myMethods = new ArrayList<>();
+
+//        初始化路由树
+        initRouterNode();
+
 //        扫描里面所有的方法，然后保存到属性里面
         for (Class<?> aClass : controllerClass) {
             String prefixUrl = null;
@@ -54,31 +65,136 @@ public class SimpleHandlerMapping implements HandlerMapping {
             List<Method> controllerMappingMethod = getControllerMappingMethod(aClass);
 //            创建一个自己的method类，将里面的参数保存到这里面
             for (Method method : controllerMappingMethod) {
+
                 String mappingUrl = getMethodMappingUrl(method);
                 MyMethod myMethod = new MyMethod();
                 String url = prefixUrl == null ? mappingUrl : prefixUrl + mappingUrl;
+
                 myMethod.setUrl(url);
                 myMethod.setMethodName(method.getName());
                 myMethod.setReturnType(method.getReturnType());
                 myMethod.setMethodParameters(getMethodParameters(method));
                 myMethod.setRequestMethod(getRequestMethod(method));
                 myMethod.setClassName(aClass);
-                myMethods.add(myMethod);
+                String[] split = url.split("/");
+
+                split = Arrays.copyOfRange(split,1,split.length);
+                buildRouterNode(split, myMethod);
+
             }
         }
-        allMappingMethod = myMethods;
-        return myMethods;
+        System.out.println("初始化所有接口成功。。。。。");
     }
 
-    @Override
-    public YhHandlerExecutionChain getHandler(HttpServletRequest request) {
-        String requestURI = request.getRequestURI();
-        String method = request.getMethod();
-        for (MyMethod myMethod : allMappingMethod) {
-            if (myMethod.getUrl().equals(requestURI) && myMethod.getRequestMethod().equals(method)) {
-                return new YhHandlerExecutionChain(myMethod);
+    /**
+     * 构建路由字典树
+     * @param parts
+     * @param myMethod
+     */
+    private void buildRouterNode(String[] parts, MyMethod myMethod) {
+
+
+        parts = parsePattern(parts);
+
+        addRouterNode(parts,0,myMethod,routerNodeHeader);
+
+
+
+    }
+
+    /**
+     * 递归添加节点
+     * @param parts
+     * @param length
+     * @param myMethod
+     */
+    private void addRouterNode(String[] parts, int length, MyMethod myMethod,RouterNode node) {
+        if(length == parts.length){
+            node.getMyMethods().add(myMethod);
+            return;
+        }
+
+        String part = parts[length];
+        RouterNode matchNode = findMatchNode(part,node);
+//        如果没有匹配的节点，那么就自己创建一个新的节点，然后初始化里面的值
+        if(matchNode == null) {
+            RouterNode routerNode = new RouterNode();
+            routerNode.setPart(part);
+            routerNode.setChildren(new ArrayList<>());
+            routerNode.setWild(part.equals("*"));
+            routerNode.setMyMethods(new ArrayList<>());
+            node.getChildren().add(routerNode);
+            addRouterNode(parts, length + 1, myMethod,routerNode);
+//        如果有匹配的节点，那么就将这个节点的方法添加进去
+        }else{
+            addRouterNode(parts, length + 1, myMethod,matchNode);
+        }
+
+    }
+
+    /**
+     * 解析通配符
+     * @param parts
+     * @return
+     */
+    private String[] parsePattern(String[] parts) {
+        for(int i = 0; i < parts.length; i++){
+            String part = parts[i];
+            if(part.startsWith("{") && part.endsWith("}")){
+                parts[i] = "*";
             }
         }
+        return parts;
+    }
+
+    /**
+     * 查找是否有匹配的节点
+     * @param part
+     * @return
+     */
+    private RouterNode findMatchNode(String part,RouterNode node) {
+        List<RouterNode> children = node.getChildren();
+        for (RouterNode child : children) {
+            if(child.getPart().equals(part)){
+                return child;
+            }
+        }
+        return null;
+    }
+
+    private void initRouterNode() {
+        RouterNode routerNode = new RouterNode();
+        routerNode.setPart("/");
+        routerNode.setChildren(new ArrayList<>());
+        routerNode.setWild(false);
+        routerNode.setMyMethods(new ArrayList<>());
+        routerNodeHeader = routerNode;
+    }
+
+
+    /**
+     * 根据用户请求的地址，获取对应的可以处理他的handlerMapping
+     *
+     * @param request
+     * @return
+     */
+    @Override
+    public YhHandlerExecutionChain getHandler(HttpServletRequest request) {
+//        String requestURI = request.getRequestURI();
+//        String method = request.getMethod();
+//        YhHandlerExecutionChain returnHandler = null;
+////        1. 先直接匹配，看能不能匹配到
+//        for (MyMethod myMethod : allMappingMethod) {
+//
+//            if (myMethod.getUrl().equals(requestURI) && myMethod.getRequestMethod().equals(method)) {
+//                returnHandler = new YhHandlerExecutionChain(myMethod);
+//            }
+//        }
+//        if (returnHandler == null) {
+////        2. 如果匹配不到，那么就需要去匹配那些通配符的匹配
+//
+//        }
+//        return returnHandler;
         return null;
     }
 
@@ -151,6 +267,12 @@ public class SimpleHandlerMapping implements HandlerMapping {
         return null;
     }
 
+    /**
+     * 获取方法上面的注解的值
+     *
+     * @param method
+     * @return
+     */
     private String getMethodMappingUrl(Method method) {
         PostMapping postAnnotation = method.getAnnotation(PostMapping.class);
         RequestMapping requestAnnotation = method.getAnnotation(RequestMapping.class);

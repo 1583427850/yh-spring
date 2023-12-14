@@ -86,6 +86,21 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
                 methodParams.add(parameter);
 
             }
+
+            if (RequestConstant.PARAM_TYPE_PATH.equals(paramType)) {
+//                需要获取请求路径后面携带的参数
+                String requestURI = request.getRequestURI();
+                String[] requestPath = requestURI.split("/");
+                String[] srcPath = handlerMethod.getUrl().split("/");
+                if(requestPath.length==srcPath.length){
+                    System.out.println("路径参数不匹配");
+//                    TODO 统一返回错误信息
+                }
+                String s = requestPath[requestPath.length - 1];
+
+                methodParams.add(s);
+            }
+
 //            TODO 还有一个url参数没写
 
         }

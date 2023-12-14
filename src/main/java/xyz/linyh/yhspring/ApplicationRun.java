@@ -29,14 +29,11 @@ public class ApplicationRun {
         controllerClass = ControllerAnnoScan.getControllerClass(packageName);
 //        根据controller里面的所有controller，获取所有的方法
         HandlerMapping simpleHandlerMapping = SimpleHandlerMapping.getInstance();
-        List list = simpleHandlerMapping.buildMapping(controllerClass);
-
+        simpleHandlerMapping.buildMapping(controllerClass);
 //        启动tomcat
         startTomcat();
 
-        for (Object o : list) {
-            System.out.println(o);
-        }
+
 
     }
 
