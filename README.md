@@ -1,5 +1,14 @@
-获取所有controller
+# 简易版spring
 
-将里面所有的requestMapping写到一个统一容器里面
+## 功能
+1. 会在启动的时候将所有controller下面的接口全部获取出来
+2. 通过字典树构建成一个链表，在用户请求的时候可以通过handlerMapping来获取对应的方法
+3. 然后通过handlerAdaptor来获取参数和执行对应的方法
+4. 只需要和springboot一样声明方法接口，然后dispatchServlet里面可以将对应的参数传递到接口方法参数里面。
+5. 统一配置所有的请求和响应编码
 
-用户请求时候，会将参数注入到带有requestMapping的方法参数上面，不需要自己手动获取参数然后写入
+## todo
+1. 添加ioc 
+
+
+

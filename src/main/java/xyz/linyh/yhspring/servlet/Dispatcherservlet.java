@@ -1,6 +1,7 @@
 package xyz.linyh.yhspring.servlet;
 
 
+import cn.hutool.json.JSONUtil;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,13 +15,15 @@ import xyz.linyh.yhspring.handle.SimpleHandlerMapping;
 @WebServlet(name = "dispatcherservlet", urlPatterns = "/**")
 public class Dispatcherservlet extends HttpServlet {
     public void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
+//        统一设置请求编码和响应编码
+        response.setCharacterEncoding("UTF-8");
+        request.setCharacterEncoding("UTF-8");
         System.out.println(request.getRequestURI());
 
         YhHandlerExecutionChain handler = getHandler(request);
 
         if (handler == null) {
-//            TODO 统一返回错误信息
-            System.out.println("handler is null");
+            noHandlerFound(request, response);
             return;
         }
 
@@ -29,9 +32,18 @@ public class Dispatcherservlet extends HttpServlet {
 
 //        利用adaptor执行对应方法，然后获取到返回值
         String result = handlerAdaptor.handle(request, response, handler.getHandlerMethod());
+
+//        TODO 都只返回json 后续会根据注解判断返回什么类型
+//        统一设置响应编码
+        response.getWriter().print(result);
+
         System.out.println("返回结果为:" + result);
 
 
+    }
+
+    protected void noHandlerFound(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        response.sendError(HttpServletResponse.SC_NOT_FOUND);
     }
 
     /**
@@ -46,7 +58,6 @@ public class Dispatcherservlet extends HttpServlet {
 
 
     }
-
 
 
     /**

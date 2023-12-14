@@ -5,7 +5,6 @@ import cn.hutool.json.JSONUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.HttpMethod;
-import org.apache.tomcat.util.buf.StringUtils;
 import xyz.linyh.yhspring.constant.RequestConstant;
 import xyz.linyh.yhspring.entity.MyMethod;
 import xyz.linyh.yhspring.entity.MyMethodParameter;
@@ -53,7 +52,7 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
         Method method = handlerMethod.getClassName().getMethod(handlerMethod.getMethodName(), methodParameterTypes.toArray(new Class<?>[0]));
 
         if (method == null) {
-//            TODO
+//            TODO 返回
             System.out.println("method is null");
             return null;
         }
@@ -88,7 +87,9 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
             if (RequestConstant.PARAM_TYPE_PARAM.equals(paramType)) {
                 String parameter = request.getParameter(name);
                 if (parameter == null && methodParameter.getRequire()) {
-//                    TODO 应该写一个返回前端的一个方法，后面统一加
+//                     TODO 如果参数是httpServletRequest或response这些，还需要给他注入，这些也需要特殊判断
+
+//                    TODO 如果真的没有应该写一个返回前端的一个方法，后面统一加
                     System.out.println("参数不能为空");
 //                    后面就没必要继续执行了
                 }
@@ -105,12 +106,12 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
                     System.out.println("路径参数不匹配");
 //                    TODO 统一返回错误信息
                 }
-//                TODO 获取参数出现错误
                 String s = requestPath[requestPath.length - pathParamNum--];
                 methodParams.add(s);
             }
 
-//            TODO 还有一个url参数没写
+
+
 
         }
 

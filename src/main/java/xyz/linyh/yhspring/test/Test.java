@@ -1,6 +1,7 @@
 package xyz.linyh.yhspring.test;
 
 import cn.hutool.json.JSONUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import xyz.linyh.yhspring.annotation.*;
 import xyz.linyh.yhspring.entity.MyMethod;
@@ -36,11 +37,12 @@ public class Test {
     }
 
     @PostMapping("/test4/{id}/{pageId}")
-    public void test4(String username, @RequestBody user user, @PathVariable("id") String id, @PathVariable("pageId") String pageId) {
+    public user test4(String username, @RequestBody user user, @PathVariable("id") String id, @PathVariable("pageId") String pageId, HttpServletRequest request) {
         System.out.println(username);
         System.out.println(user);
         System.out.println(id);
         System.out.println(pageId);
+        return user;
     }
 
 
