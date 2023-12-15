@@ -5,6 +5,7 @@ import cn.hutool.json.JSONUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.HttpMethod;
+import lombok.extern.slf4j.Slf4j;
 import xyz.linyh.yhspring.constant.RequestConstant;
 import xyz.linyh.yhspring.context.MyApplicationContext;
 import xyz.linyh.yhspring.entity.MyMethod;
@@ -16,6 +17,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class SimpleHandlerAdaptor implements HandlerAdaptor {
 
     /**
@@ -35,7 +37,7 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
 //        获取里面的方法参数
         List<MyMethodParameter> methodParameters = handlerMethod.getMethodParameters();
 
-//        获取pathPramers个数
+//        获取pathParams个数
         int pathParamNum = 0;
         for(MyMethodParameter methodParameter : methodParameters) {
             if (RequestConstant.PARAM_TYPE_PATH.equals(methodParameter.getParamType())) {
@@ -54,8 +56,7 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
         Method method = handlerMethod.getClassName().getMethod(handlerMethod.getMethodName(), methodParameterTypes.toArray(new Class<?>[0]));
 
         if (method == null) {
-//            TODO 返回
-            System.out.println("method is null");
+            log.error("找不到对应方法，{}", handlerMethod.getMethodName());
             return null;
         }
 
@@ -72,7 +73,7 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
             }
 
             bodyJson = JSONUtil.toJsonStr(wholeStr);
-            System.out.println(bodyJson);
+            log.info("请求体为:{}", bodyJson);
         }
 
         ArrayList<Object> methodParams = new ArrayList<>();
@@ -89,14 +90,21 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
             if (RequestConstant.PARAM_TYPE_PARAM.equals(paramType)) {
                 String parameter = request.getParameter(name);
                 if (parameter == null && methodParameter.getRequire()) {
-//                     TODO 如果参数是httpServletRequest或response这些，还需要给他注入，这些也需要特殊判断
 
 //                    TODO 如果真的没有应该写一个返回前端的一个方法，后面统一加
-                    System.out.println("参数不能为空");
+                    log.error("参数不能为空:{}", name);
 //                    后面就没必要继续执行了
                 }
                 methodParams.add(parameter);
 
+            }
+
+            if(RequestConstant.PARAM_TYPE_REQUEST.equals(paramType)){
+                methodParams.add(request);
+            }
+
+            if(RequestConstant.PARAM_TYPE_RESPONSE.equals(paramType)){
+                methodParams.add(response);
             }
 
             if (RequestConstant.PARAM_TYPE_PATH.equals(paramType)) {
@@ -105,7 +113,7 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
                 String[] requestPath = requestURI.split("/");
                 String[] srcPath = handlerMethod.getUrl().split("/");
                 if(requestPath.length!=srcPath.length){
-                    System.out.println("路径参数不匹配");
+                    log.error("路径参数不匹配:{}", requestURI);
 //                    TODO 统一返回错误信息
                 }
                 String s = requestPath[requestPath.length - pathParamNum--];
@@ -132,18 +140,15 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
      * @return
      */
     private Object jsonBodyToBean(String bodyJson, Class<?> type) {
-        if (bodyJson == null) {
-            System.out.println("bodyJson is null");
-        }
-        if (bodyJson == null || bodyJson.length() < 1) {
-            return null;
+        if (bodyJson == null || bodyJson.isEmpty()) {
+            log.info("请求体为空");
         }
         try {
 
             return JSONUtil.toBean(bodyJson, type);
         } catch (Exception e) {
 //            TODO 错误信息统一返回
-            System.out.println("json转换错误");
+            log.error("json转换错误,{}", e.getMessage());
         }
         return null;
     }

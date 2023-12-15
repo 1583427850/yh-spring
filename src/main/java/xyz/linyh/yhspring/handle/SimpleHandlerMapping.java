@@ -1,6 +1,8 @@
 package xyz.linyh.yhspring.handle;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import xyz.linyh.yhspring.annotation.*;
 import xyz.linyh.yhspring.constant.RequestConstant;
 import xyz.linyh.yhspring.entity.MyMethod;
@@ -11,11 +13,14 @@ import xyz.linyh.yhspring.servlet.YhHandlerExecutionChain;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.*;
 
 /**
  * @author lin
  */
+@Slf4j
 public class SimpleHandlerMapping implements HandlerMapping {
 
     /**
@@ -83,7 +88,7 @@ public class SimpleHandlerMapping implements HandlerMapping {
 
             }
         }
-        System.out.println("初始化所有接口成功。。。。。");
+        log.info("初始化所有接口成功。。。。。");
     }
 
     /**
@@ -268,6 +273,16 @@ public class SimpleHandlerMapping implements HandlerMapping {
                 return RequestConstant.PARAM_TYPE_PATH;
             }
         }
+//        如果是httpServletRequest或response这些，还需要添加特殊的类型
+        if(parameter.getType().isAssignableFrom(HttpServletRequest.class) || parameter.getType().isAssignableFrom(HttpRequest.class)){
+            return RequestConstant.PARAM_TYPE_REQUEST;
+        }
+
+        if(parameter.getType().isAssignableFrom(HttpServletResponse.class) || parameter.getType().isAssignableFrom(HttpResponse.class)){
+            return RequestConstant.PARAM_TYPE_RESPONSE;
+        }
+
+        System.out.println(parameter.getType());
         return RequestConstant.PARAM_TYPE_PARAM;
     }
 

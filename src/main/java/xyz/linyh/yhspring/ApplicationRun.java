@@ -1,6 +1,7 @@
 package xyz.linyh.yhspring;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.Server;
 import org.apache.catalina.Service;
@@ -15,14 +16,24 @@ import xyz.linyh.yhspring.handle.HandlerMapping;
 import xyz.linyh.yhspring.handle.SimpleHandlerMapping;
 import xyz.linyh.yhspring.servlet.Dispatcherservlet;
 
-import java.io.IOException;
 import java.util.List;
 
+@Slf4j
 public class ApplicationRun {
 
     private static List<Class<?>> controllerClass;
 
-    public static void run(String... args) throws Exception {
+    public static void run(String... args) {
+
+        try {
+            go(args);
+        } catch (Exception e) {
+            log.error("启动失败,{}",e.getMessage());
+            System.exit(1);
+        }
+    }
+
+    private static void go(String... args) throws Exception {
 
 //        获取所有的bean环境
 //        获取这个类当前的package
@@ -36,15 +47,11 @@ public class ApplicationRun {
         MyApplicationContext context = MyApplicationContext.getInstance();
 //        刷新容器
         context.refresh(packageName);
-
-
-
-
-
+        log.info("容器刷新成功");
 
 //        启动tomcat
         startTomcat();
-
+        log.info("tomcat启动成功");
 
 
     }

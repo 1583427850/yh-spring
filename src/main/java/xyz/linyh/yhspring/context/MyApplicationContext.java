@@ -1,5 +1,6 @@
 package xyz.linyh.yhspring.context;
 
+import lombok.extern.slf4j.Slf4j;
 import xyz.linyh.yhspring.annotation.YhAutoWrite;
 import xyz.linyh.yhspring.annotationScan.ComponentScan;
 import xyz.linyh.yhspring.entity.BeanDefinition;
@@ -12,12 +13,12 @@ import java.util.Map;
 
 /**
  * 自定义的ApplicationContext
- *
  * 存一些实例化后的bean对象
  * ...
  *
  * @author lin
  */
+@Slf4j
 public class MyApplicationContext {
 
 
@@ -68,7 +69,7 @@ public class MyApplicationContext {
     public void refresh(String packageName) throws Exception {
 //        TODO 这个应该在创建容器后，保存到容器中
         List<Class<?>> componentClasses = ComponentScan.getComponentClass(packageName);
-
+//        TODO 还需要将configuration里面带有bean的注入到ioc容器中
 //        创建对应的beanDefinition，然后保存起来
         for (Class<?> componentclass : componentClasses) {
             Class<?> aClass = Class.forName(componentclass.getName());
@@ -81,7 +82,6 @@ public class MyApplicationContext {
             beanDefinition.setInstance(instance);
             beans.put(beanDefinition.getBeanName(), beanDefinition);
         }
-//        TODO 还需要将configuration里面带有bean的注入到ioc容器中
 
 //        将注册到bean容器里面的类在扫描一遍，看有没有携带@autowrite这些注解的，如果有，就注入
         beans.forEach((k, v) -> {
@@ -89,31 +89,26 @@ public class MyApplicationContext {
             for (Field field : beanClass.getDeclaredFields()) {
                 if (needAutowired(field)) {
 
-//                    TODO 只是根据参数名字注入而已，还需要判断类型（判断在bean容量里面的对象，如果是这个属性的实现类或父类，那么也可以注入）
                     BeanDefinition beanDefinition = beans.get(field.getName());
-//                    TODO 根据参数类型注入
                     Class<?> type = field.getType();
                     if(beanDefinition == null){
                         beanDefinition = getBeanByType(type);
                     }
 
-
                     if(beanDefinition == null){
-                        System.out.println(field.getName()+":这个属性没有注入成功");
+                        log.error("属性注入失败,{}",field.getName());
                     }
                     Object instance = beanDefinition.getInstance();
                     try {
                         field.setAccessible(true);
                         field.set(v.getInstance(), instance);
                     } catch (IllegalAccessException e) {
-                        System.out.println("属性注入失败");
-                        e.printStackTrace();
+                       log.error("属性注入失败,{}",e.getMessage());
                     }
                 }
             }
         });
 
-        // TODO 后面所有加入到beans后，这个context可能也要加到ioc容器中
     }
 
     /**

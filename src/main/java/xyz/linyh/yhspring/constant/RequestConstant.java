@@ -18,4 +18,7 @@ public interface RequestConstant {
     String PARAM_TYPE_PATH = "path";
 
 
+    String PARAM_TYPE_REQUEST = "request";
+
+    String PARAM_TYPE_RESPONSE = "response";
 }

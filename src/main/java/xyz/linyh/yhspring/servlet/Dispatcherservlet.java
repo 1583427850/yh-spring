@@ -6,14 +6,21 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.SneakyThrows;
-import xyz.linyh.yhspring.context.MyApplicationContext;
+import lombok.extern.slf4j.Slf4j;
 import xyz.linyh.yhspring.handle.HandlerAdaptor;
 import xyz.linyh.yhspring.handle.HandlerMapping;
 import xyz.linyh.yhspring.handle.SimpleHandlerAdaptor;
 import xyz.linyh.yhspring.handle.SimpleHandlerMapping;
 
+/**
+ * TODO 简易版
+ * 请求统一接收和转发类
+ * @author lin
+ */
 @WebServlet(name = "dispatcherservlet", urlPatterns = "/**")
+@Slf4j
 public class Dispatcherservlet extends HttpServlet {
     public void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
 //        统一设置请求编码和响应编码
@@ -35,14 +42,22 @@ public class Dispatcherservlet extends HttpServlet {
         String result = handlerAdaptor.handle(request, response, handler.getHandlerMethod());
 
 //        TODO 都只返回json 后续会根据注解判断返回什么类型
-
-        System.out.println("返回结果为:" + result);
+        Class<?> returnType = handler.getHandlerMethod().getReturnType();
+       String voidReturn = "void";
+        if (!returnType.getName().equals(voidReturn)){
+            System.out.println("返回结果为:" + result);
+            response.getWriter().print(JSONUtil.toJsonStr(result));
+        }
 
 
     }
 
     protected void noHandlerFound(HttpServletRequest request, HttpServletResponse response) throws Exception {
         response.sendError(HttpServletResponse.SC_NOT_FOUND);
+    }
+
+    private void systemErrorReturn(HttpServletResponse response) throws Exception {
+        response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
     /**
@@ -75,14 +90,23 @@ public class Dispatcherservlet extends HttpServlet {
     @SneakyThrows
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
-        System.out.println("doGet");
-        doDispatch(req, resp);
+        try {
+            doDispatch(req, resp);
+        } catch (Exception e) {
+            log.error("doGet error:{}", e.getMessage());
+            systemErrorReturn(resp);
+            throw new RuntimeException(e);
+        }
     }
 
     @SneakyThrows
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
-        System.out.println("doPost");
-        doDispatch(req, resp);
+        try {
+            doDispatch(req, resp);
+        } catch (Exception e) {
+            log.info("doPost error:{}", e.getMessage());
+            systemErrorReturn(resp);
+        }
     }
 }
