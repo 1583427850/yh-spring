@@ -83,16 +83,20 @@ public class MyApplicationContext {
         }
 //        TODO 还需要将configuration里面带有bean的注入到ioc容器中
 
-//        将注册到bean容器里面的类在扫描一遍，看有没有携带@autowrite这些注解的，在注入一遍
+//        将注册到bean容器里面的类在扫描一遍，看有没有携带@autowrite这些注解的，如果有，就注入
         beans.forEach((k, v) -> {
             Class<?> beanClass = v.getBeanClass();
             for (Field field : beanClass.getDeclaredFields()) {
                 if (needAutowired(field)) {
-                    Class<? extends Field> aClass = field.getClass();
-                    System.out.println(field.getName());
-                    System.out.println(field.getType());
+
 //                    TODO 只是根据参数名字注入而已，还需要判断类型（判断在bean容量里面的对象，如果是这个属性的实现类或父类，那么也可以注入）
                     BeanDefinition beanDefinition = beans.get(field.getName());
+//                    TODO 根据参数类型注入
+                    Class<?> type = field.getType();
+                    if(beanDefinition == null){
+                        beanDefinition = getBeanByType(type);
+                    }
+
 
                     if(beanDefinition == null){
                         System.out.println(field.getName()+":这个属性没有注入成功");
@@ -110,6 +114,20 @@ public class MyApplicationContext {
         });
 
         // TODO 后面所有加入到beans后，这个context可能也要加到ioc容器中
+    }
+
+    /**
+     * 获取这个类型的bean（先只会获取第一个）
+     * @param type
+     * @return
+     */
+    private BeanDefinition getBeanByType(Class<?> type) {
+        for (BeanDefinition beanDefinition : beans.values()) {
+            if(type.isAssignableFrom(beanDefinition.getBeanClass())){
+                return beanDefinition;
+            }
+        }
+        return null;
     }
 
     /**
