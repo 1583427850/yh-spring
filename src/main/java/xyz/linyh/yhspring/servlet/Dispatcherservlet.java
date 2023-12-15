@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
+import xyz.linyh.yhspring.context.MyApplicationContext;
 import xyz.linyh.yhspring.handle.HandlerAdaptor;
 import xyz.linyh.yhspring.handle.HandlerMapping;
 import xyz.linyh.yhspring.handle.SimpleHandlerAdaptor;
@@ -34,8 +35,6 @@ public class Dispatcherservlet extends HttpServlet {
         String result = handlerAdaptor.handle(request, response, handler.getHandlerMethod());
 
 //        TODO 都只返回json 后续会根据注解判断返回什么类型
-//        统一设置响应编码
-        response.getWriter().print(result);
 
         System.out.println("返回结果为:" + result);
 

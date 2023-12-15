@@ -10,6 +10,7 @@ import org.apache.catalina.core.StandardEngine;
 import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.startup.Tomcat;
 import xyz.linyh.yhspring.annotationScan.ControllerAnnoScan;
+import xyz.linyh.yhspring.context.MyApplicationContext;
 import xyz.linyh.yhspring.handle.HandlerMapping;
 import xyz.linyh.yhspring.handle.SimpleHandlerMapping;
 import xyz.linyh.yhspring.servlet.Dispatcherservlet;
@@ -21,7 +22,7 @@ public class ApplicationRun {
 
     private static List<Class<?>> controllerClass;
 
-    public static void run(String... args) throws IOException, ClassNotFoundException, LifecycleException {
+    public static void run(String... args) throws Exception {
 
 //        获取所有的bean环境
 //        获取这个类当前的package
@@ -30,6 +31,17 @@ public class ApplicationRun {
 //        根据controller里面的所有controller，获取所有的方法
         HandlerMapping simpleHandlerMapping = SimpleHandlerMapping.getInstance();
         simpleHandlerMapping.buildMapping(controllerClass);
+
+//        创建一个servlet容器
+        MyApplicationContext context = MyApplicationContext.getInstance();
+//        刷新容器
+        context.refresh(packageName);
+
+
+
+
+
+
 //        启动tomcat
         startTomcat();
 

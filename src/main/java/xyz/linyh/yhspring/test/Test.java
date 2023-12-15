@@ -6,6 +6,7 @@ import lombok.Data;
 import xyz.linyh.yhspring.annotation.*;
 import xyz.linyh.yhspring.entity.MyMethod;
 import xyz.linyh.yhspring.entity.MyMethodParameter;
+import xyz.linyh.yhspring.utils.ScanUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Target;
@@ -14,6 +15,11 @@ import java.lang.reflect.Method;
 
 @YhController
 public class Test {
+
+    @YhAutoWrite
+    private Test2Service test2Service;
+
+
 
     @RequestMapping(value = "/test")
     public void test1(String username, MyMethod testMethod) {
@@ -42,9 +48,9 @@ public class Test {
         System.out.println(user);
         System.out.println(id);
         System.out.println(pageId);
+        test2Service.hello();
         return user;
     }
-
 
     @Data
     class user {
@@ -52,10 +58,6 @@ public class Test {
         private String password;
     }
 
-//    public static void main(String[] args) {
-//        JSONUtil.toBean("")
-//        {    "username": "tom",    "password": "123456"}
-//    }
 
 
 }

@@ -1,11 +1,13 @@
 package xyz.linyh.yhspring.annotationScan;
 
 import xyz.linyh.yhspring.annotation.YhController;
+import xyz.linyh.yhspring.utils.ScanUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -25,10 +27,9 @@ public class ControllerAnnoScan {
             return classes;
         }
         File dir = new File(resource.getFile());
+        return ScanUtils.getClassByUrl(dir, packageName, classes, Arrays.asList(YhController.class));
 
-        return getClassByUrl(dir, packageName, classes);
-
-
+//        return getClassByUrl(dir, packageName, classes);
     }
 
     /**
@@ -40,7 +41,7 @@ public class ControllerAnnoScan {
      * @throws ClassNotFoundException
      */
     private static List<Class<?>> getClassByUrl(File dir, String filePath, ArrayList<Class<?>> classes) throws ClassNotFoundException {
-//        System.out.println(filePath);
+
         File[] files = dir.listFiles();
         for (File file : files) {
             if (file.isDirectory()) {

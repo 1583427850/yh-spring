@@ -6,8 +6,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.HttpMethod;
 import xyz.linyh.yhspring.constant.RequestConstant;
+import xyz.linyh.yhspring.context.MyApplicationContext;
 import xyz.linyh.yhspring.entity.MyMethod;
 import xyz.linyh.yhspring.entity.MyMethodParameter;
+import xyz.linyh.yhspring.utils.ScanUtils;
 
 import java.io.BufferedReader;
 import java.lang.reflect.Method;
@@ -111,11 +113,12 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
             }
 
 
-
-
         }
 
-        Object invoke = method.invoke(handlerMethod.getClassName().newInstance(), methodParams.toArray());
+        MyApplicationContext context = MyApplicationContext.getInstance();
+        String name = ScanUtils.FirstWorldToLower(handlerMethod.getClassName().getSimpleName());
+        Object bean = context.getBean(name);
+        Object invoke = method.invoke(bean, methodParams.toArray());
 
 //        TODO 后面还需要处理返回值给前端，直接先都转为json
         return JSONUtil.toJsonStr(invoke);
