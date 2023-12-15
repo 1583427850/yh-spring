@@ -1,12 +1,20 @@
 package xyz.linyh.yhspring.context;
 
 import lombok.extern.slf4j.Slf4j;
+import org.yaml.snakeyaml.Yaml;
 import xyz.linyh.yhspring.annotation.YhAutoWrite;
+import xyz.linyh.yhspring.annotation.YhValue;
 import xyz.linyh.yhspring.annotationScan.ComponentScan;
 import xyz.linyh.yhspring.entity.BeanDefinition;
 import xyz.linyh.yhspring.utils.ScanUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +77,6 @@ public class MyApplicationContext {
     public void refresh(String packageName) throws Exception {
 //        TODO 这个应该在创建容器后，保存到容器中
         List<Class<?>> componentClasses = ComponentScan.getComponentClass(packageName);
-//        TODO 还需要将configuration里面带有bean的注入到ioc容器中
 //        创建对应的beanDefinition，然后保存起来
         for (Class<?> componentclass : componentClasses) {
             Class<?> aClass = Class.forName(componentclass.getName());
@@ -91,20 +98,40 @@ public class MyApplicationContext {
 
                     BeanDefinition beanDefinition = beans.get(field.getName());
                     Class<?> type = field.getType();
-                    if(beanDefinition == null){
+                    if (beanDefinition == null) {
                         beanDefinition = getBeanByType(type);
                     }
 
-                    if(beanDefinition == null){
-                        log.error("属性注入失败,{}",field.getName());
+                    if (beanDefinition == null) {
+                        log.error("属性注入失败,{}", field.getName());
                     }
                     Object instance = beanDefinition.getInstance();
                     try {
                         field.setAccessible(true);
                         field.set(v.getInstance(), instance);
                     } catch (IllegalAccessException e) {
-                       log.error("属性注入失败,{}",e.getMessage());
+                        log.error("属性注入失败,{}", e.getMessage());
                     }
+                } else if (field.isAnnotationPresent(YhValue.class)) {
+//                    TODO 读取配置文件，然后写入值
+                    Yaml yaml = new Yaml();
+                    URI uri = null;
+                    try {
+//                        TODO 修改格式和逻辑
+                        uri = ClassLoader.getSystemResource("application.yml").toURI();
+                        InputStream in = Files.newInputStream(Paths.get(uri));
+                        Map map = yaml.loadAs(in, Map.class);
+                        in.close();
+
+                        map.forEach((k2, v2) -> {
+                            System.out.println(k2 + "  " + v2);
+                        });
+                    } catch (URISyntaxException e) {
+                        throw new RuntimeException(e);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
                 }
             }
         });
@@ -113,12 +140,13 @@ public class MyApplicationContext {
 
     /**
      * 获取这个类型的bean（先只会获取第一个）
+     *
      * @param type
      * @return
      */
     private BeanDefinition getBeanByType(Class<?> type) {
         for (BeanDefinition beanDefinition : beans.values()) {
-            if(type.isAssignableFrom(beanDefinition.getBeanClass())){
+            if (type.isAssignableFrom(beanDefinition.getBeanClass())) {
                 return beanDefinition;
             }
         }

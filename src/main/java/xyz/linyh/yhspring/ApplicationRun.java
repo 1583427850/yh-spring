@@ -28,7 +28,8 @@ public class ApplicationRun {
         try {
             go(args);
         } catch (Exception e) {
-            log.error("启动失败,{}",e.getMessage());
+            log.error("启动失败");
+            e.printStackTrace();
             System.exit(1);
         }
     }
@@ -42,6 +43,7 @@ public class ApplicationRun {
 //        根据controller里面的所有controller，获取所有的方法
         HandlerMapping simpleHandlerMapping = SimpleHandlerMapping.getInstance();
         simpleHandlerMapping.buildMapping(controllerClass);
+
 
 //        创建一个servlet容器
         MyApplicationContext context = MyApplicationContext.getInstance();
