@@ -2,6 +2,7 @@ package xyz.linyh.yhspring.servlet;
 
 
 import cn.hutool.json.JSONUtil;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,10 +10,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import xyz.linyh.yhspring.entity.MultiPartFile;
 import xyz.linyh.yhspring.handle.HandlerAdaptor;
 import xyz.linyh.yhspring.handle.HandlerMapping;
 import xyz.linyh.yhspring.handle.SimpleHandlerAdaptor;
 import xyz.linyh.yhspring.handle.SimpleHandlerMapping;
+import xyz.linyh.yhspring.resolver.MyFileParamResolver;
 
 /**
  * TODO 简易版
@@ -91,7 +94,9 @@ public class Dispatcherservlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) {
         try {
+
             doDispatch(req, resp);
+
         } catch (Exception e) {
             log.error("doGet error:{}", e.getMessage());
             systemErrorReturn(resp);
@@ -106,6 +111,7 @@ public class Dispatcherservlet extends HttpServlet {
             doDispatch(req, resp);
         } catch (Exception e) {
             log.info("doPost error:{}", e.getMessage());
+            e.printStackTrace();
             systemErrorReturn(resp);
         }
     }

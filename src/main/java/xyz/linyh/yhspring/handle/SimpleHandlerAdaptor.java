@@ -8,11 +8,15 @@ import jakarta.ws.rs.HttpMethod;
 import lombok.extern.slf4j.Slf4j;
 import xyz.linyh.yhspring.constant.RequestConstant;
 import xyz.linyh.yhspring.context.MyApplicationContext;
+import xyz.linyh.yhspring.entity.MultiPartFile;
 import xyz.linyh.yhspring.entity.MyMethod;
 import xyz.linyh.yhspring.entity.MyMethodParameter;
+import xyz.linyh.yhspring.resolver.MyFileParamResolver;
 import xyz.linyh.yhspring.utils.ScanUtils;
 
 import java.io.BufferedReader;
+import java.lang.invoke.VarHandle;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +36,7 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
     @Override
     public String handle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 
+//        TODO 应该先把所有参数都解析看需要那个resolver，然后全部保存起来，然后一个一个解析后调用方法
         MyMethod handlerMethod = (MyMethod) handler;
 
 //        获取里面的方法参数
@@ -60,10 +65,10 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
             return null;
         }
 
-        if (request.getMethod().equals(HttpMethod.POST)) {
+        if (request.getMethod().equals(HttpMethod.POST)&& request.getContentType().startsWith("application/json")) {
             BufferedReader reader = request.getReader();
             String str, wholeStr = "";
-            while ((str = reader.readLine()) != null) {
+            while ((str = reader.readLine()) != null ) {
 //                还需要加\n
                 wholeStr += str + "\n";
             }
@@ -95,7 +100,19 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
                     log.error("参数不能为空:{}", name);
 //                    后面就没必要继续执行了
                 }
-                methodParams.add(parameter);
+                Object param = castToClass(parameter, methodParameter.getType());
+                methodParams.add(param);
+
+            }
+
+            MyFileParamResolver myFileParamResolver = new MyFileParamResolver();
+            if (myFileParamResolver.supports(methodParameter)) {
+                Object file = myFileParamResolver.resolveArgument(methodParameter, request);
+                if(file!=null){
+                    methodParams.add((MultiPartFile)file);
+                }else{
+                    methodParams.add(null);
+                }
 
             }
 
@@ -116,8 +133,11 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
                     log.error("路径参数不匹配:{}", requestURI);
 //                    TODO 统一返回错误信息
                 }
+                Class<?> type = methodParameter.getType();
                 String s = requestPath[requestPath.length - pathParamNum--];
-                methodParams.add(s);
+                Object param = castToClass(s,type);
+
+                methodParams.add(param);
             }
 
 
@@ -130,6 +150,25 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
 
 //        TODO 后面还需要处理返回值给前端，直接先都转为json
         return JSONUtil.toJsonStr(invoke);
+    }
+
+    /**
+     * 讲String转为对应的实体类
+     * @param s
+     * @param type
+     * @return
+     */
+    private Object castToClass(String s, Class<?> type) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        Method valueOf = null;
+        try {
+            valueOf = type.getMethod("valueOf",String.class);
+        } catch (NoSuchMethodException e) {
+            return s;
+        } catch (SecurityException e) {
+            throw new RuntimeException(e);
+        }
+        Object invoke = valueOf.invoke(null, s);
+        return invoke;
     }
 
     /**

@@ -26,7 +26,9 @@ public class ApplicationRun {
     public static void run(String... args) {
 
         try {
+
             go(args);
+
         } catch (Exception e) {
             log.error("启动失败");
             e.printStackTrace();
@@ -36,14 +38,13 @@ public class ApplicationRun {
 
     private static void go(String... args) throws Exception {
 
-//        获取所有的bean环境
 //        获取这个类当前的package
         String packageName = ApplicationRun.class.getPackage().getName();
         controllerClass = ControllerAnnoScan.getControllerClass(packageName);
+
 //        根据controller里面的所有controller，获取所有的方法
         HandlerMapping simpleHandlerMapping = SimpleHandlerMapping.getInstance();
         simpleHandlerMapping.buildMapping(controllerClass);
-
 
 //        创建一个servlet容器
         MyApplicationContext context = MyApplicationContext.getInstance();
@@ -53,6 +54,7 @@ public class ApplicationRun {
 
 //        刷新容器
         context.refresh(packageName);
+
         log.info("容器刷新成功");
 
 //        启动tomcat

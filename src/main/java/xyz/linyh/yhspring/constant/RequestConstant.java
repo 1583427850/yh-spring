@@ -20,5 +20,7 @@ public interface RequestConstant {
 
     String PARAM_TYPE_REQUEST = "request";
 
+    String PARAM_TYPE_MULTIPART = "multiPart";
+
     String PARAM_TYPE_RESPONSE = "response";
 }

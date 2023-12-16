@@ -7,7 +7,6 @@ import xyz.linyh.yhspring.annotation.YhBean;
 import xyz.linyh.yhspring.annotation.YhConfiguration;
 import xyz.linyh.yhspring.annotation.YhValue;
 import xyz.linyh.yhspring.annotationScan.ComponentScan;
-import xyz.linyh.yhspring.constant.RequestConstant;
 import xyz.linyh.yhspring.entity.BeanDefinition;
 import xyz.linyh.yhspring.utils.ScanUtils;
 
@@ -16,7 +15,6 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,12 +35,6 @@ public class MyApplicationContext {
      * 配置文件map
      */
     private Map configMap;
-
-
-    static {
-
-
-    }
 
     /**
      * 保存所有注册到ioc容器的bean对象
@@ -124,7 +116,7 @@ public class MyApplicationContext {
         }
 
 //        将所有杯context管理的类里面的@YhValue注入值
-        beans.forEach((k,v)->{
+        beans.forEach((k, v) -> {
             Class<?> beanClass = v.getBeanClass();
             for (Field field : beanClass.getDeclaredFields()) {
                 if (field.isAnnotationPresent(YhValue.class)) {
@@ -134,25 +126,25 @@ public class MyApplicationContext {
         });
 
 //        获取@Configuration里面的@bean注解创建的实现类，加载到bean容器里面
-       beans.forEach((k,v)->{
-           if(v.getBeanClass().isAnnotationPresent(YhConfiguration.class)){
+        beans.forEach((k, v) -> {
+            if (v.getBeanClass().isAnnotationPresent(YhConfiguration.class)) {
 //                获取里面的所有bean
-               for (Method method : v.getBeanClass().getMethods()) {
-                   if(method.isAnnotationPresent(YhBean.class)){
-                       try {
+                for (Method method : v.getBeanClass().getMethods()) {
+                    if (method.isAnnotationPresent(YhBean.class)) {
+                        try {
 //                           TODO 可能方法有一些参数，可以查看bean有没有这些属性，然后注入后在调用
-                           Object instance = method.invoke(v.getInstance());
-                           addBeanToBeans(instance,method);
+                            Object instance = method.invoke(v.getInstance());
+                            addBeanToBeans(instance, method);
 
-                       } catch (IllegalAccessException e) {
-                           throw new RuntimeException(e);
-                       } catch (InvocationTargetException e) {
-                           throw new RuntimeException(e);
-                       }
-                   }
-               }
-           }
-       });
+                        } catch (IllegalAccessException e) {
+                            throw new RuntimeException(e);
+                        } catch (InvocationTargetException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+            }
+        });
 
 //        将注册到bean容器里面的类在扫描一遍，看有没有携带@autowrite这些注解的，如果有，就注入
         beans.forEach((k, v) -> {
@@ -168,16 +160,17 @@ public class MyApplicationContext {
 
     /**
      * 将方法的返回值instance添加到beans容器中
+     *
      * @param instance
      * @param method
      */
     private void addBeanToBeans(Object instance, Method method) {
-        if(instance==null || method==null){
+        if (instance == null || method == null) {
             return;
         }
         String name = method.getName();
         Class<?> returnType = method.getReturnType();
-        if(returnType.getName().equals("void")){
+        if (returnType.getName().equals("void")) {
             return;
         }
         BeanDefinition beanDefinition = new BeanDefinition();
@@ -185,8 +178,7 @@ public class MyApplicationContext {
         beanDefinition.setBeanClass(returnType);
         beanDefinition.setBeanClassName(returnType.getName());
         beanDefinition.setInstance(instance);
-        beans.put(name,beanDefinition);
-
+        beans.put(name, beanDefinition);
     }
 
     /**
@@ -204,17 +196,17 @@ public class MyApplicationContext {
 //        去map里面获取对应的配置文件信息
         Map tempMap = configMap;
         String configValue = null;
-        for (int i = 0; i < split.length-1; i++) {
+        for (int i = 0; i < split.length - 1; i++) {
             Object newMap = tempMap.get(split[i]);
-            tempMap = (Map<?,?>) newMap;
+            tempMap = (Map<?, ?>) newMap;
         }
 
         try {
-            if (tempMap==null){
+            if (tempMap == null) {
                 return;
             }
             field.setAccessible(true);
-            field.set(v.getInstance(), tempMap.get(split[split.length-1]));
+            field.set(v.getInstance(), tempMap.get(split[split.length - 1]));
         } catch (IllegalAccessException e) {
             log.error("通过反射赋值属性失败:{}", e.getMessage());
         }

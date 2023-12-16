@@ -23,6 +23,7 @@ public class TestConfig {
     public Prople prople() {
         Prople prople = new Prople();
         prople.setAge(age);
+        prople.setName(name);
         return prople;
     }
 }

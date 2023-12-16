@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import xyz.linyh.yhspring.annotation.*;
 import xyz.linyh.yhspring.constant.RequestConstant;
+import xyz.linyh.yhspring.entity.MultiPartFile;
 import xyz.linyh.yhspring.entity.MyMethod;
 import xyz.linyh.yhspring.entity.MyMethodParameter;
 import xyz.linyh.yhspring.entity.RouterNode;
@@ -276,6 +277,10 @@ public class SimpleHandlerMapping implements HandlerMapping {
 //        如果是httpServletRequest或response这些，还需要添加特殊的类型
         if(parameter.getType().isAssignableFrom(HttpServletRequest.class) || parameter.getType().isAssignableFrom(HttpRequest.class)){
             return RequestConstant.PARAM_TYPE_REQUEST;
+        }
+
+        if (parameter.getType().equals(MultiPartFile.class)) {
+            return RequestConstant.PARAM_TYPE_MULTIPART;
         }
 
         if(parameter.getType().isAssignableFrom(HttpServletResponse.class) || parameter.getType().isAssignableFrom(HttpResponse.class)){
