@@ -47,6 +47,10 @@ public class ApplicationRun {
 
 //        创建一个servlet容器
         MyApplicationContext context = MyApplicationContext.getInstance();
+
+//        加载初始化配置
+        context.loadConfig();
+
 //        刷新容器
         context.refresh(packageName);
         log.info("容器刷新成功");

@@ -8,11 +8,11 @@ import java.lang.annotation.Target;
 /**
  * @author lin
  */
-
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface RequestMapping {
+public @interface YhGetMapping {
 
     String value() default "";
 
-    String must() default "false";
+    String must() default "true";
 }

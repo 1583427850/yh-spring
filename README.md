@@ -10,5 +10,9 @@
 ## todo
 1. 添加ioc 
 
+## 配置
+通过反射获取方法参数名字，
+需要在javac 添加 -parameters
+
 
 

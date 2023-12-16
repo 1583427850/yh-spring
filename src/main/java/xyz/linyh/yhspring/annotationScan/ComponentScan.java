@@ -1,7 +1,7 @@
 package xyz.linyh.yhspring.annotationScan;
 
 import lombok.extern.slf4j.Slf4j;
-import xyz.linyh.yhspring.annotation.Configuration;
+import xyz.linyh.yhspring.annotation.YhConfiguration;
 import xyz.linyh.yhspring.annotation.YhComponent;
 import xyz.linyh.yhspring.annotation.YhController;
 import xyz.linyh.yhspring.annotation.YhService;
@@ -36,7 +36,7 @@ public class ComponentScan {
         }
         File dir = new File(resource.getFile());
         try {
-            return ScanUtils.getClassByUrl(dir, packageName, classes, Arrays.asList(YhController.class, YhService.class, YhComponent.class, Configuration.class));
+            return ScanUtils.getClassByUrl(dir, packageName, classes, Arrays.asList(YhController.class, YhService.class, YhComponent.class, YhConfiguration.class));
         } catch (ClassNotFoundException e) {
             System.out.println("扫描类失败");
 //            TODO 改为打印日志

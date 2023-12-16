@@ -63,7 +63,7 @@ public class SimpleHandlerMapping implements HandlerMapping {
 //        扫描里面所有的方法，然后保存到属性里面
         for (Class<?> aClass : controllerClass) {
             String prefixUrl = null;
-            if (aClass.isAnnotationPresent(RequestMapping.class) || aClass.isAnnotationPresent(GetMapping.class) || aClass.isAnnotationPresent(PostMapping.class)) {
+            if (aClass.isAnnotationPresent(YhRequestMapping.class) || aClass.isAnnotationPresent(YhGetMapping.class) || aClass.isAnnotationPresent(YhPostMapping.class)) {
                 prefixUrl = getControllerMappingUrl(aClass);
             }
 
@@ -223,9 +223,9 @@ public class SimpleHandlerMapping implements HandlerMapping {
 
     private String getRequestMethod(Method method) {
 //        TODO 后面扩展为可以设置多个请求方式
-        boolean hasGetMapping = method.isAnnotationPresent(GetMapping.class);
-        boolean hasPostMapping = method.isAnnotationPresent(PostMapping.class);
-        boolean hasRequestMapping = method.isAnnotationPresent(RequestMapping.class);
+        boolean hasGetMapping = method.isAnnotationPresent(YhGetMapping.class);
+        boolean hasPostMapping = method.isAnnotationPresent(YhPostMapping.class);
+        boolean hasRequestMapping = method.isAnnotationPresent(YhRequestMapping.class);
         if (hasGetMapping) {
             return "GET";
         } else if (hasPostMapping) {
@@ -267,9 +267,9 @@ public class SimpleHandlerMapping implements HandlerMapping {
     private String getParamType(Parameter parameter) {
         Annotation[] annotations = parameter.getAnnotations();
         for (Annotation annotation : annotations) {
-            if (annotation instanceof RequestBody) {
+            if (annotation instanceof YhRequestBody) {
                 return RequestConstant.PARAM_TYPE_BODY;
-            } else if (annotation instanceof PathVariable) {
+            } else if (annotation instanceof YhPathVariable) {
                 return RequestConstant.PARAM_TYPE_PATH;
             }
         }
@@ -287,9 +287,9 @@ public class SimpleHandlerMapping implements HandlerMapping {
     }
 
     private String getControllerMappingUrl(Class<?> aClass) {
-        PostMapping postAnnotation = aClass.getAnnotation(PostMapping.class);
-        RequestMapping requestAnnotation = aClass.getAnnotation(RequestMapping.class);
-        GetMapping annotation = aClass.getAnnotation(GetMapping.class);
+        YhPostMapping postAnnotation = aClass.getAnnotation(YhPostMapping.class);
+        YhRequestMapping requestAnnotation = aClass.getAnnotation(YhRequestMapping.class);
+        YhGetMapping annotation = aClass.getAnnotation(YhGetMapping.class);
         if (postAnnotation != null) {
             return postAnnotation.value();
         } else if (requestAnnotation != null) {
@@ -307,9 +307,9 @@ public class SimpleHandlerMapping implements HandlerMapping {
      * @return
      */
     private String getMethodMappingUrl(Method method) {
-        PostMapping postAnnotation = method.getAnnotation(PostMapping.class);
-        RequestMapping requestAnnotation = method.getAnnotation(RequestMapping.class);
-        GetMapping annotation = method.getAnnotation(GetMapping.class);
+        YhPostMapping postAnnotation = method.getAnnotation(YhPostMapping.class);
+        YhRequestMapping requestAnnotation = method.getAnnotation(YhRequestMapping.class);
+        YhGetMapping annotation = method.getAnnotation(YhGetMapping.class);
         if (postAnnotation != null) {
             return postAnnotation.value();
         } else if (requestAnnotation != null) {
@@ -328,7 +328,7 @@ public class SimpleHandlerMapping implements HandlerMapping {
             Annotation[] declaredAnnotations = method.getDeclaredAnnotations();
             for (Annotation declaredAnnotation : declaredAnnotations) {
 //                判断是否是requestMapping或getMapping或PostMapping
-                if (method.isAnnotationPresent(GetMapping.class) || method.isAnnotationPresent(PostMapping.class) || method.isAnnotationPresent(RequestMapping.class)) {
+                if (method.isAnnotationPresent(YhGetMapping.class) || method.isAnnotationPresent(YhPostMapping.class) || method.isAnnotationPresent(YhRequestMapping.class)) {
                     controllerMethods.add(method);
                 }
 

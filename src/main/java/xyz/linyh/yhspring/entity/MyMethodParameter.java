@@ -3,7 +3,6 @@ package xyz.linyh.yhspring.entity;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import xyz.linyh.yhspring.annotation.GetMapping;
 
 @Data
 @Getter
