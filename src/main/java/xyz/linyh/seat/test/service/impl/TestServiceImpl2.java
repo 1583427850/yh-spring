@@ -1,4 +1,4 @@
-package xyz.linyh.yhspring.test.service.impl;
+package xyz.linyh.seat.test.service.impl;
 
 /**
  * @author lin

@@ -1,7 +1,7 @@
-package xyz.linyh.yhspring.test.service.impl;
+package xyz.linyh.seat.test.service.impl;
 
 import xyz.linyh.yhspring.annotation.YhComponent;
-import xyz.linyh.yhspring.test.service.TestService;
+import xyz.linyh.seat.test.service.TestService;
 
 /**
  * @author lin

@@ -1,4 +1,4 @@
-package xyz.linyh.yhspring.test.service;
+package xyz.linyh.seat.test.service;
 
 public interface TestService {
 

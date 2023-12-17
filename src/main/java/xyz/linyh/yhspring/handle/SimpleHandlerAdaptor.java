@@ -1,6 +1,5 @@
 package xyz.linyh.yhspring.handle;
 
-import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,7 +14,6 @@ import xyz.linyh.yhspring.resolver.MyFileParamResolver;
 import xyz.linyh.yhspring.utils.ScanUtils;
 
 import java.io.BufferedReader;
-import java.lang.invoke.VarHandle;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -44,7 +42,7 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
 
 //        获取pathParams个数
         int pathParamNum = 0;
-        for(MyMethodParameter methodParameter : methodParameters) {
+        for (MyMethodParameter methodParameter : methodParameters) {
             if (RequestConstant.PARAM_TYPE_PATH.equals(methodParameter.getParamType())) {
                 pathParamNum++;
             }
@@ -65,10 +63,10 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
             return null;
         }
 
-        if (request.getMethod().equals(HttpMethod.POST)&& request.getContentType().startsWith("application/json")) {
+        if (request.getMethod().equals(HttpMethod.POST) && request.getContentType().startsWith("application/json")) {
             BufferedReader reader = request.getReader();
             String str, wholeStr = "";
-            while ((str = reader.readLine()) != null ) {
+            while ((str = reader.readLine()) != null) {
 //                还需要加\n
                 wholeStr += str + "\n";
             }
@@ -108,19 +106,19 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
             MyFileParamResolver myFileParamResolver = new MyFileParamResolver();
             if (myFileParamResolver.supports(methodParameter)) {
                 Object file = myFileParamResolver.resolveArgument(methodParameter, request);
-                if(file!=null){
-                    methodParams.add((MultiPartFile)file);
-                }else{
+                if (file != null) {
+                    methodParams.add((MultiPartFile) file);
+                } else {
                     methodParams.add(null);
                 }
 
             }
 
-            if(RequestConstant.PARAM_TYPE_REQUEST.equals(paramType)){
+            if (RequestConstant.PARAM_TYPE_REQUEST.equals(paramType)) {
                 methodParams.add(request);
             }
 
-            if(RequestConstant.PARAM_TYPE_RESPONSE.equals(paramType)){
+            if (RequestConstant.PARAM_TYPE_RESPONSE.equals(paramType)) {
                 methodParams.add(response);
             }
 
@@ -129,13 +127,13 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
                 String requestURI = request.getRequestURI();
                 String[] requestPath = requestURI.split("/");
                 String[] srcPath = handlerMethod.getUrl().split("/");
-                if(requestPath.length!=srcPath.length){
+                if (requestPath.length != srcPath.length) {
                     log.error("路径参数不匹配:{}", requestURI);
 //                    TODO 统一返回错误信息
                 }
                 Class<?> type = methodParameter.getType();
                 String s = requestPath[requestPath.length - pathParamNum--];
-                Object param = castToClass(s,type);
+                Object param = castToClass(s, type);
 
                 methodParams.add(param);
             }
@@ -154,6 +152,7 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
 
     /**
      * 讲String转为对应的实体类
+     *
      * @param s
      * @param type
      * @return
@@ -161,7 +160,7 @@ public class SimpleHandlerAdaptor implements HandlerAdaptor {
     private Object castToClass(String s, Class<?> type) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         Method valueOf = null;
         try {
-            valueOf = type.getMethod("valueOf",String.class);
+            valueOf = type.getMethod("valueOf", String.class);
         } catch (NoSuchMethodException e) {
             return s;
         } catch (SecurityException e) {

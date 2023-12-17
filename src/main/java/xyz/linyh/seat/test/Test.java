@@ -1,19 +1,14 @@
-package xyz.linyh.yhspring.test;
+package xyz.linyh.seat.test;
 
-import cn.hutool.http.HttpRequest;
-import cn.hutool.http.HttpResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.xml.bind.SchemaOutputResolver;
 import lombok.Data;
 import xyz.linyh.yhspring.annotation.*;
 import xyz.linyh.yhspring.entity.MultiPartFile;
 import xyz.linyh.yhspring.entity.MyMethod;
 import xyz.linyh.yhspring.entity.MyMethodParameter;
-import xyz.linyh.yhspring.test.config.TestConfig;
-import xyz.linyh.yhspring.test.eneity.Prople;
-import xyz.linyh.yhspring.test.service.TestService;
-import xyz.linyh.yhspring.test.service.impl.TestServiceImpl;
-import xyz.linyh.yhspring.test.service.impl.TestServiceImpl2;
+import xyz.linyh.seat.test.config.TestConfig;
+import xyz.linyh.seat.test.eneity.Prople;
+import xyz.linyh.seat.test.service.TestService;
 
 import java.io.File;
 import java.io.FileOutputStream;

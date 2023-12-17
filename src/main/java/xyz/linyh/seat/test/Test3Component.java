@@ -1,4 +1,4 @@
-package xyz.linyh.yhspring.test;
+package xyz.linyh.seat.test;
 
 import xyz.linyh.yhspring.annotation.YhComponent;
 

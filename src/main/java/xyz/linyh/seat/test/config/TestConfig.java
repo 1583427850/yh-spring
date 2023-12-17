@@ -1,10 +1,10 @@
-package xyz.linyh.yhspring.test.config;
+package xyz.linyh.seat.test.config;
 
 import lombok.Data;
 import xyz.linyh.yhspring.annotation.YhBean;
 import xyz.linyh.yhspring.annotation.YhConfiguration;
 import xyz.linyh.yhspring.annotation.YhValue;
-import xyz.linyh.yhspring.test.eneity.Prople;
+import xyz.linyh.seat.test.eneity.Prople;
 
 /**
  * @author lin

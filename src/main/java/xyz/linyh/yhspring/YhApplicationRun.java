@@ -19,7 +19,7 @@ import xyz.linyh.yhspring.servlet.Dispatcherservlet;
 import java.util.List;
 
 @Slf4j
-public class ApplicationRun {
+public class YhApplicationRun {
 
     private static List<Class<?>> controllerClass;
 
@@ -38,9 +38,10 @@ public class ApplicationRun {
 
     private static void go(String... args) throws Exception {
 
-//        获取这个类当前的package
-        String packageName = ApplicationRun.class.getPackage().getName();
-        controllerClass = ControllerAnnoScan.getControllerClass(packageName);
+//        获取这个ComponentScan所在类的package
+
+        String packageName = YhApplicationRun.class.getPackage().getName();
+        controllerClass = ControllerAnnoScan.getControllerClass("xyz.linyh.seat");
 
 //        根据controller里面的所有controller，获取所有的方法
         HandlerMapping simpleHandlerMapping = SimpleHandlerMapping.getInstance();
@@ -60,7 +61,6 @@ public class ApplicationRun {
 //        启动tomcat
         startTomcat();
         log.info("tomcat启动成功");
-
 
     }
 

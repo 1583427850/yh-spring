@@ -1,4 +1,4 @@
-package xyz.linyh.yhspring.test.eneity;
+package xyz.linyh.seat.test.eneity;
 
 import lombok.Data;
 
