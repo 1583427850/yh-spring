@@ -110,8 +110,7 @@ public class Dispatcherservlet extends HttpServlet {
         try {
             doDispatch(req, resp);
         } catch (Exception e) {
-            log.info("doPost error:{}", e.getMessage());
-            e.printStackTrace();
+            log.info("doPost error:{}", e.getMessage(),e);
             systemErrorReturn(resp);
         }
     }

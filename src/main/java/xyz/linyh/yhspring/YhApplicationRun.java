@@ -40,8 +40,9 @@ public class YhApplicationRun {
 
 //        获取这个ComponentScan所在类的package
 
-        String packageName = YhApplicationRun.class.getPackage().getName();
-        controllerClass = ControllerAnnoScan.getControllerClass("xyz.linyh.seat");
+//        String packageName = YhApplicationRun.class.getPackage().getName();
+        String packageName = "xyz.linyh.seat";
+        controllerClass = ControllerAnnoScan.getControllerClass(packageName);
 
 //        根据controller里面的所有controller，获取所有的方法
         HandlerMapping simpleHandlerMapping = SimpleHandlerMapping.getInstance();
